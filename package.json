@@ -1,0 +1,9 @@
+{
+  "name": "chore-skill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alexa chore timer skill: spoken countdown announcements via the Alexa Timers API",
+  "devDependencies": {
+    "ask-cli": "^2.30.0"
+  }
+}

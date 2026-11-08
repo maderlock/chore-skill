@@ -1,0 +1,25 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "chore timer",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "StartChoresIntent",
+          "slots": [],
+          "samples": ["start", "start the timer", "begin chores", "start chores", "let's do chores"]
+        },
+        {
+          "name": "StopChoresIntent",
+          "slots": [],
+          "samples": ["cancel chores", "cancel the timer", "end chores", "we're finished"]
+        }
+      ],
+      "types": []
+    }
+  }
+}

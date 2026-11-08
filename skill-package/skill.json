@@ -1,0 +1,42 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-GB": {
+          "name": "Chore Timer",
+          "summary": "A 25-minute chore timer with spoken countdown reminders.",
+          "description": "Starts a 25-minute chore session and announces how much time is left at regular intervals, so music can keep playing while you work.",
+          "examplePhrases": [
+            "Alexa, open chore timer",
+            "Alexa, ask chore timer to start chores",
+            "Alexa, ask chore timer to cancel chores"
+          ],
+          "keywords": ["chores", "timer", "countdown"]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "distributionCountries": ["GB"],
+      "testingInstructions": "Personal development skill.",
+      "category": "ORGANIZERS_AND_ASSISTANTS"
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "__LAMBDA_ARN__"
+        },
+        "interfaces": []
+      }
+    },
+    "permissions": [
+      { "name": "alexa::alerts:timers:skill:readwrite" }
+    ],
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false
+    }
+  }
+}

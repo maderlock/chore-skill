@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Chore Timer Alexa skill backend
+
+Parameters:
+  SkillId:
+    Type: String
+    Description: Alexa skill ID (amzn1.ask.skill...) allowed to invoke the function
+    AllowedPattern: "^amzn1\\.ask\\.skill\\..+"
+
+Resources:
+  ChoreTimerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: chore-timer-skill
+      CodeUri: lambda/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          NODE_OPTIONS: --enable-source-maps
+      LoggingConfig:
+        LogGroup: !Ref ChoreTimerLogGroup
+      Events:
+        AlexaSkill:
+          Type: AlexaSkill
+          Properties:
+            SkillId: !Ref SkillId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/index.ts
+        Target: es2022
+        Minify: true
+        Sourcemap: true
+
+  ChoreTimerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/chore-timer-skill
+      RetentionInDays: 14
+
+Outputs:
+  FunctionArn:
+    Description: Lambda ARN used as the skill endpoint
+    Value: !GetAtt ChoreTimerFunction.Arn

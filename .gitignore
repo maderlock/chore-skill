@@ -1,0 +1,15 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.npmrc
+.ask/
+
+# Build output
+node_modules/
+.aws-sam/
+build/
+.pull/
+*.zip
+
+.DS_Store
