@@ -4,19 +4,26 @@
     "publishingInformation": {
       "locales": {
         "en-GB": {
-          "name": "Chore Timer",
+          "name": "Daily Chores",
           "summary": "A 25-minute chore timer with spoken countdown reminders.",
           "description": "Starts a 25-minute chore session and announces how much time is left at regular intervals, so music can keep playing while you work.",
           "examplePhrases": [
-            "Alexa, open chore timer",
-            "Alexa, ask chore timer to start chores",
-            "Alexa, ask chore timer to cancel chores"
+            "Alexa, open daily chores",
+            "Alexa, ask daily chores to start chores",
+            "Alexa, ask daily chores how much time is left",
+            "Alexa, ask daily chores to cancel chores"
           ],
-          "keywords": ["chores", "timer", "countdown"]
+          "keywords": [
+            "chores",
+            "timer",
+            "countdown"
+          ]
         }
       },
       "isAvailableWorldwide": false,
-      "distributionCountries": ["GB"],
+      "distributionCountries": [
+        "GB"
+      ],
       "testingInstructions": "Personal development skill.",
       "category": "ORGANIZERS_AND_ASSISTANTS"
     },
@@ -29,7 +36,9 @@
       }
     },
     "permissions": [
-      { "name": "alexa::alerts:timers:skill:readwrite" }
+      {
+        "name": "alexa::alerts:timers:skill:readwrite"
+      }
     ],
     "privacyAndCompliance": {
       "allowsPurchases": false,

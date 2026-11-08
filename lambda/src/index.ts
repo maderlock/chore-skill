@@ -85,10 +85,42 @@ const PermissionResponseHandler: Alexa.RequestHandler = {
   },
 };
 
+const FINAL_MINUTES = CHECKPOINTS[CHECKPOINTS.length - 1][0];
+
+const TimeLeftHandler: Alexa.RequestHandler = {
+  canHandle: (h) =>
+    Alexa.getRequestType(h.requestEnvelope) === 'IntentRequest' &&
+    Alexa.getIntentName(h.requestEnvelope) === 'TimeLeftIntent',
+  async handle(h) {
+    let secondsLeft = 0;
+    if (hasTimerPermission(h)) {
+      const res = await h.serviceClientFactory!.getTimerManagementServiceClient().getTimers();
+      const finalTimer = (res.timers ?? []).find(
+        (t) => t.timerLabel === `chores ${FINAL_MINUTES}` && t.status === 'ON' && t.triggerTime,
+      );
+      if (finalTimer?.triggerTime) {
+        secondsLeft = Math.round((new Date(finalTimer.triggerTime).getTime() - Date.now()) / 1000);
+      }
+    }
+    let speech: string;
+    if (secondsLeft <= 0) {
+      speech = 'There is no chore timer running.';
+    } else if (secondsLeft < 60) {
+      speech = 'Less than a minute left.';
+    } else {
+      const mins = Math.ceil(secondsLeft / 60);
+      speech = `${mins} ${mins === 1 ? 'minute' : 'minutes'} left.`;
+    }
+    return h.responseBuilder.speak(speech).withShouldEndSession(true).getResponse();
+  },
+};
+
 const StopChoresHandler: Alexa.RequestHandler = {
   canHandle: (h) =>
     Alexa.getRequestType(h.requestEnvelope) === 'IntentRequest' &&
-    Alexa.getIntentName(h.requestEnvelope) === 'StopChoresIntent',
+    ['StopChoresIntent', 'AMAZON.CancelIntent', 'AMAZON.StopIntent'].includes(
+      Alexa.getIntentName(h.requestEnvelope),
+    ),
   async handle(h) {
     if (hasTimerPermission(h)) {
       await h.serviceClientFactory!.getTimerManagementServiceClient().deleteTimers();
@@ -103,7 +135,7 @@ const HelpHandler: Alexa.RequestHandler = {
     Alexa.getIntentName(h.requestEnvelope) === 'AMAZON.HelpIntent',
   handle: (h) =>
     h.responseBuilder
-      .speak('Say start chores to begin a twenty-five minute chore timer, or cancel chores to stop it.')
+      .speak('Say start chores to begin a twenty-five minute chore timer, how much time is left to check it, or cancel to stop it.')
       .reprompt('Would you like to start chores?')
       .getResponse(),
 };
@@ -111,7 +143,7 @@ const HelpHandler: Alexa.RequestHandler = {
 const ExitHandler: Alexa.RequestHandler = {
   canHandle: (h) =>
     Alexa.getRequestType(h.requestEnvelope) === 'IntentRequest' &&
-    ['AMAZON.StopIntent', 'AMAZON.CancelIntent', 'AMAZON.NavigateHomeIntent', 'AMAZON.FallbackIntent'].includes(
+    ['AMAZON.NavigateHomeIntent', 'AMAZON.FallbackIntent'].includes(
       Alexa.getIntentName(h.requestEnvelope),
     ),
   handle: (h) => h.responseBuilder.withShouldEndSession(true).getResponse(),
@@ -138,6 +170,7 @@ export const handler = Alexa.SkillBuilders.custom()
     StartHandler,
     PermissionResponseHandler,
     StopChoresHandler,
+    TimeLeftHandler,
     HelpHandler,
     ExitHandler,
     SessionEndedHandler,

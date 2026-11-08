@@ -1,28 +1,84 @@
-# Chore Timer: Alexa skill
+# Daily Chores: an Alexa chore timer skill
 
-A 25-minute chore timer. Launching the skill creates a set of Alexa timers that
-*announce* the time remaining (no chime, nothing to dismiss), so music started
-separately, for example from Spotify in the same Alexa routine, keeps playing.
+A custom Alexa skill that runs a 25-minute chore block with spoken countdown
+reminders. Start it, and Alexa announces how much time is left at 20, 15, 10, 5
+and 1 minutes, then "time's up", while your music keeps playing.
+
+## What it does
+
+- **Starts a session.** Opening the skill creates six Alexa timers, one per
+  checkpoint, each with its own spoken message.
+- **Announces without interrupting.** The timers use the `ANNOUNCE` behaviour
+  with `playAudible: false`. Alexa speaks the text when each timer fires, with no
+  chime, and there is nothing to dismiss. Music started separately (for example a
+  Spotify playlist in the same Alexa routine) carries on underneath.
+- **Tells you the time left.** Ask "Alexa, ask daily chores how much time is
+  left" and it reads the remaining time from the running timers.
+- **Cancels cleanly.** "Cancel", "stop", "cancel chores" and similar phrases
+  delete the timers.
+
+| You say | What happens |
+|---|---|
+| "Alexa, open daily chores" | Creates the six timers and confirms |
+| "Alexa, ask daily chores to start chores" | Same, using the start intent |
+| "Alexa, ask daily chores how much time is left" | Speaks the time remaining |
+| "Alexa, ask daily chores to cancel chores" | Deletes the timers |
+
+The skill session ends straight after each reply, so ask-style phrases need the
+skill name in them.
+
+## How it works
+
+```
+Alexa device  ->  Alexa Skills Kit  ->  Lambda (TypeScript)  ->  Alexa Timers API
+                  (interaction model)   (ask-sdk-core)           (six timers)
+```
+
+1. **Interaction model** (`skill-package/`). The invocation name is
+   `daily chores`. `StartChoresIntent`, `StopChoresIntent` and `TimeLeftIntent`
+   map spoken phrases to intents.
+2. **Lambda** (`lambda/src/index.ts`). Request handlers:
+   - *Start* checks the Timers permission, deletes any previous run's timers, then
+     creates one per entry in `CHECKPOINTS`. Without the permission it asks for
+     consent, and creates the timers when the user accepts.
+   - *Time left* lists the skill's timers, finds the final one, and subtracts the
+     current time from its trigger time. No state is stored anywhere.
+   - *Stop* deletes all of the skill's timers. It also handles Alexa's built-in
+     cancel and stop intents.
+3. **Timers.** Each is created with an ISO 8601 duration, a hidden on-screen
+   display, and the `ANNOUNCE` operation described above.
+4. **Hosting.** AWS SAM deploys the Lambda, its Alexa trigger (restricted to this
+   skill's ID) and a log group with 14 days of retention. The region is `eu-west-1`
+   (Ireland), one of the regions Alexa can invoke Lambda in directly for Europe.
+   The skill locale is `en-GB`.
+5. **Skill metadata** (manifest and interaction model) is deployed separately
+   with the ASK CLI. SAM owns the Lambda; the ASK CLI never deploys code.
+
+`skill.json` holds the placeholder `__LAMBDA_ARN__`. `make deploy-skill` reads the
+real ARN from the CloudFormation stack output and renders it into `build/`, which
+is gitignored, so no account ID is ever committed.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `lambda/` | TypeScript skill handler (ask-sdk-core), bundled by SAM with esbuild |
+| `lambda/` | TypeScript skill handler (`ask-sdk-core`), bundled by SAM with esbuild |
 | `skill-package/` | Skill manifest and interaction model, deployed with the ASK CLI |
 | `template.yaml`, `samconfig.toml` | SAM stack: Lambda, Alexa trigger, log group |
 | `.env.example` | Template for local settings (copy to `.env`, which is gitignored) |
 | `Makefile` | Build and deploy entry points (`make help`) |
+| `.github/workflows/ci.yml` | Type-check, SAM lint and build, and secret scan |
 
-`skill.json` contains `__LAMBDA_ARN__`, which `make deploy-skill` replaces with the
-ARN from the CloudFormation stack output. The rendered copy goes in `build/`
-(gitignored), so no account ID or skill ID is ever committed.
+The repo is the source of truth for the skill. `make deploy-skill` overwrites the
+manifest and interaction model in the Alexa Developer Console, so make changes
+here and not in the console.
 
 ## Prerequisites
 
-- Node 22, AWS CLI v2, AWS SAM CLI (`brew install awscli aws-sam-cli`)
-- An AWS SSO profile
+- Node 22 (see `.nvmrc`), AWS CLI v2, AWS SAM CLI (`brew install awscli aws-sam-cli`)
+- An AWS SSO profile with permission to deploy Lambda and CloudFormation in `eu-west-1`
 - An ASK CLI profile linked to the Amazon developer account that owns the skill
+- An existing skill in the Alexa Developer Console (custom model, `en-GB`)
 
 ## First-time setup
 
@@ -30,14 +86,14 @@ ARN from the CloudFormation stack output. The rendered copy goes in `build/`
 make install                     # installs the ASK CLI locally + Lambda deps
 npx ask configure --no-browser   # sign in to the Amazon developer account;
                                  # answer "No" to linking an AWS account
-```
-
-```sh
-cp .env.example .env   # then set AWS_PROFILE and SKILL_ID
+cp .env.example .env             # then set AWS_PROFILE and SKILL_ID
 ```
 
 All account-specific values live in `.env`. ASK CLI credentials are stored in
 `~/.ask/` by `ask configure`, outside the repo.
+
+After the first deploy, grant the Timers permission once: Alexa app, More,
+Skills & Games, Your Skills, Dev, the skill, Settings, Manage permissions.
 
 ## Everyday use
 
@@ -50,9 +106,17 @@ make logs      # tail CloudWatch logs
 Other targets: `typecheck`, `validate`, `build`, `deploy-lambda`, `deploy-skill`,
 `pull-skill` (download the live skill package to `.pull/` for comparison), `clean`.
 
+## Playing music alongside it
+
+Create an Alexa routine with the skill as the first action (a Custom action
+`open daily chores`) and your music as the last action, with an optional 25-minute
+sleep timer. Keep the music last so starting the skill does not interrupt it.
+
 ## Changing the countdown
 
-Edit `CHECKPOINTS` in `lambda/src/index.ts` and run `make push`.
+Edit `CHECKPOINTS` in `lambda/src/index.ts` (minutes after the start, and the
+words Alexa says) and run `make push`. The last entry is treated as the end of the
+session when answering "how much time is left".
 
 ## Public repo hygiene
 

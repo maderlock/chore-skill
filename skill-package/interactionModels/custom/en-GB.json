@@ -1,22 +1,78 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "chore timer",
+      "invocationName": "daily chores",
       "intents": [
-        { "name": "AMAZON.CancelIntent", "samples": [] },
-        { "name": "AMAZON.HelpIntent", "samples": [] },
-        { "name": "AMAZON.StopIntent", "samples": [] },
-        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
-        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
         {
           "name": "StartChoresIntent",
           "slots": [],
-          "samples": ["start", "start the timer", "begin chores", "start chores", "let's do chores"]
+          "samples": [
+            "start",
+            "start the timer",
+            "begin chores",
+            "start chores",
+            "let's do chores"
+          ]
         },
         {
           "name": "StopChoresIntent",
           "slots": [],
-          "samples": ["cancel chores", "cancel the timer", "end chores", "we're finished"]
+          "samples": [
+            "cancel chores",
+            "cancel the chores",
+            "cancel the timer",
+            "cancel timer",
+            "cancel the chore timer",
+            "stop chores",
+            "stop the chores",
+            "stop the timer",
+            "end chores",
+            "we're finished"
+          ]
+        },
+        {
+          "name": "TimeLeftIntent",
+          "slots": [],
+          "samples": [
+            "what time is left",
+            "what time is remaining",
+            "remaining time",
+            "the remaining time",
+            "time left",
+            "time remaining",
+            "how much time is left",
+            "how much time is remaining",
+            "how much time is left on the timer",
+            "how long is left",
+            "how long is there left",
+            "how long to go",
+            "how long left",
+            "what's the time left",
+            "what is the time left",
+            "what's the remaining time",
+            "how many minutes are left",
+            "how many minutes left"
+          ]
         }
       ],
       "types": []
