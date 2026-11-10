@@ -6,7 +6,11 @@ ASK_PROFILE ?= default
 AWS_PROFILE ?=
 SKILL_ID    ?=
 
-export AWS_PROFILE AWS_REGION
+export AWS_REGION
+# Only export a profile when one is set, so CI (no .env) uses no profile at all.
+ifneq ($(strip $(AWS_PROFILE)),)
+export AWS_PROFILE
+endif
 
 STACK     := chore-timer-skill
 ASK       := $(CURDIR)/node_modules/.bin/ask
