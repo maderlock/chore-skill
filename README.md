@@ -1,13 +1,14 @@
 # Daily Chores: an Alexa chore timer skill
 
-A custom Alexa skill that runs a 25-minute chore block with spoken countdown
-reminders. Start it, and Alexa announces how much time is left at 20, 15, 10, 5
-and 1 minutes, then "time's up", while your music keeps playing.
+A custom Alexa skill that runs a chore session of a length you choose (1 to 120
+minutes, 25 by default) with spoken countdown reminders. Start it, and Alexa
+announces how much time is left, then "time's up", while your music keeps playing.
 
 ## What it does
 
-- **Starts a session.** Opening the skill creates six Alexa timers, one per
-  checkpoint, each with its own spoken message.
+- **Starts a session of any length.** Say how many minutes (1 to 120) and the
+  skill creates one Alexa timer per reminder, each with its own spoken message.
+  With no length it runs 25 minutes.
 - **Announces without interrupting.** The timers use the `ANNOUNCE` behaviour
   with `playAudible: false`. Alexa speaks the text when each timer fires, with no
   chime, and there is nothing to dismiss. Music started separately (for example a
@@ -19,19 +20,36 @@ and 1 minutes, then "time's up", while your music keeps playing.
 
 | You say | What happens |
 |---|---|
-| "Alexa, open daily chores" | Creates the six timers and confirms |
-| "Alexa, ask daily chores to start chores" | Same, using the start intent |
+| "Alexa, open daily chores" | Starts a 25-minute session |
+| "Alexa, tell daily chores to start for ten minutes" | Starts a 10-minute session |
+| "Alexa, tell daily chores to run for twelve minutes" | Starts a 12-minute session |
 | "Alexa, ask daily chores how much time is left" | Speaks the time remaining |
 | "Alexa, ask daily chores to cancel chores" | Deletes the timers |
 
 The skill session ends straight after each reply, so ask-style phrases need the
 skill name in them.
 
+### Reminder schedule
+
+Reminders are spoken at 1 and 5 minutes left, plus every multiple of 5 minutes
+left above that, so a 13-minute session reminds at 10, 5 and 1 minutes left, and a
+25-minute one at 20, 15, 10, 5 and 1. Then "time's up" at the end. Alexa limits how
+many timers a skill can hold, so for long sessions the earlier reminders are spaced
+10, 15, 20... minutes apart instead, keeping to 10 timers in total.
+
+### Limits
+
+- **120 minutes maximum.** Alexa will not create a timer more than two hours
+  ahead.
+- **Music is not controlled by the skill.** It cannot start or stop Spotify. The
+  routine starts the playlist; stop it yourself when the final announcement plays,
+  or say "stop".
+
 ## How it works
 
 ```
 Alexa device  ->  Alexa Skills Kit  ->  Lambda (TypeScript)  ->  Alexa Timers API
-                  (interaction model)   (ask-sdk-core)           (six timers)
+                  (interaction model)   (ask-sdk-core)           (a few timers)
 ```
 
 1. **Interaction model** (`skill-package/`). The invocation name is
@@ -39,7 +57,8 @@ Alexa device  ->  Alexa Skills Kit  ->  Lambda (TypeScript)  ->  Alexa Timers AP
    map spoken phrases to intents.
 2. **Lambda** (`lambda/src/index.ts`). Request handlers:
    - *Start* checks the Timers permission, deletes any previous run's timers, then
-     creates one per entry in `CHECKPOINTS`. Without the permission it asks for
+     creates one per reminder from `buildCheckpoints` (`lambda/src/schedule.ts`). Without
+     the permission it asks for
      consent, and creates the timers when the user accepts.
    - *Time left* lists the skill's timers, finds the final one, and subtracts the
      current time from its trigger time. No state is stored anywhere.
@@ -108,15 +127,18 @@ Other targets: `typecheck`, `validate`, `build`, `deploy-lambda`, `deploy-skill`
 
 ## Playing music alongside it
 
-Create an Alexa routine with the skill as the first action (a Custom action
-`open daily chores`) and your music as the last action, with an optional 25-minute
-sleep timer. Keep the music last so starting the skill does not interrupt it.
+Create an Alexa routine with the skill as the first action (a Custom action such
+as `tell daily chores to start for 25 minutes`) and your music as the last action.
+Keep the music last so starting the skill does not interrupt it. A routine's sleep
+timer is a fixed length, so either leave it off and stop the music yourself, or make
+one routine per common length with a matching sleep timer.
 
 ## Changing the countdown
 
-Edit `CHECKPOINTS` in `lambda/src/index.ts` (minutes after the start, and the
-words Alexa says) and run `make push`. The last entry is treated as the end of the
-session when answering "how much time is left".
+Edit `buildCheckpoints` in `lambda/src/schedule.ts` (when reminders fire and the
+words Alexa says), or the `DEFAULT_MINUTES`, `MAX_MINUTES` and `MAX_TIMERS`
+constants at the top of that file, and run `make push`. The latest-ending running
+timer is treated as the end of the session when answering "how much time is left".
 
 ## Public repo hygiene
 

@@ -5,13 +5,12 @@
       "locales": {
         "en-GB": {
           "name": "Daily Chores",
-          "summary": "A 25-minute chore timer with spoken countdown reminders.",
-          "description": "Starts a 25-minute chore session and announces how much time is left at regular intervals, so music can keep playing while you work.",
+          "summary": "A chore timer, 1 to 120 minutes, with spoken countdown reminders.",
+          "description": "Starts a chore session of the length you choose and announces how much time is left at regular intervals, so music can keep playing while you work.",
           "examplePhrases": [
             "Alexa, open daily chores",
-            "Alexa, ask daily chores to start chores",
-            "Alexa, ask daily chores how much time is left",
-            "Alexa, ask daily chores to cancel chores"
+            "Alexa, tell daily chores to start for ten minutes",
+            "Alexa, ask daily chores how much time is left"
           ],
           "keywords": [
             "chores",

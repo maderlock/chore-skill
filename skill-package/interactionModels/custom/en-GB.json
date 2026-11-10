@@ -25,13 +25,30 @@
         },
         {
           "name": "StartChoresIntent",
-          "slots": [],
+          "slots": [
+            {
+              "name": "minutes",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
           "samples": [
             "start",
             "start the timer",
             "begin chores",
             "start chores",
-            "let's do chores"
+            "let's do chores",
+            "start for {minutes} minutes",
+            "start for {minutes} minute",
+            "run for {minutes} minutes",
+            "run for {minutes} minute",
+            "begin for {minutes} minutes",
+            "start chores for {minutes} minutes",
+            "run chores for {minutes} minutes",
+            "start a {minutes} minute timer",
+            "start a {minutes} minute chore timer",
+            "do {minutes} minutes",
+            "{minutes} minutes",
+            "{minutes}"
           ]
         },
         {
