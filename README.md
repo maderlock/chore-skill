@@ -1,5 +1,7 @@
 # Daily Chores: an Alexa chore timer skill
 
+[![CI](https://github.com/maderlock/chore-skill/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/maderlock/chore-skill/actions/workflows/ci.yml)
+
 A custom Alexa skill that runs a chore session of a length you choose (1 to 120
 minutes, 25 by default) with spoken countdown reminders. Start it, and Alexa
 announces how much time is left, then "time's up", while your music keeps playing.
